@@ -1,0 +1,9 @@
+A
+_____________
+America UED
+....
+B
+_____________
+Bangladesh BDT
+.....
+and the clicking the section of country name nad code should be save in the a state
