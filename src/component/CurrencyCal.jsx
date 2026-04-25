@@ -13,7 +13,7 @@ function CurrencyCal({set,show,setSear,setbar,Cur_bar,bardata,btn}) {
   })
   const [overwrite, setOverwrite] = useState({ to: false, from: false })
   const operators = ["+", "-", "x", "÷"]
-
+  const [updateTime,setupdatetime]=useState('')
   const [To_code,SetTo_code]=useState(()=>
     lastConvert?
     { name:lastConvert.fromname, code:lastConvert.fromcode }
@@ -43,6 +43,12 @@ useEffect(()=>{
     setCurFromMsg(From_code.amount)
     
 },[show,setSear.isSearch])
+useEffect(()=>{
+const currentMsg = isToOrFrom===0 ? CurFromMsg : CurToMsg
+    const func       = isToOrFrom===0 ? setCurToMsg : setCurFromMsg
+    if(currentMsg==='')
+      func('')
+},[CurFromMsg,CurToMsg])
   const hasOperatorOrBracket = (msg) => /[+\-x÷%()]/.test(msg)
 
   const handlecalculate = (fieldMsg) => {
@@ -80,7 +86,7 @@ useEffect(()=>{
 
   // ─── conversion ───────────────────────────────────────────────────────────
 const handleConhistory=(to,from,amount)=>{
-  console.log("His",from,to)
+ 
   const temp={
     fromname:from.name,
     fromcode:from.code,
@@ -93,17 +99,26 @@ const handleConhistory=(to,from,amount)=>{
 }
   // convert FROM → TO and put result in the inactive field
   const handleConvert = async (fromCode, toCode, rawMsg) => {
-   
-    console.log(From_code,To_code)
+   const func=isToOrFrom==0?setCurToMsg:setCurFromMsg
+    
     const evaluated = handlecalculate(rawMsg) ?? rawMsg
     const numeric   = parseFloat(evaluated)
+    if(rawMsg=='') return
     if (isNaN(numeric)) return
 
     try {
       const data = await fetch(
         `https://fxapi.app/api/${fromCode}/${toCode}.json`
       ).then(r => r.json())
-
+      let date=new Date(data.timestamp)
+      setupdatetime(date.toLocaleString("en-US",{
+        month:"short",
+        day:'2-digit',
+        year:'numeric',
+        hour:'2-digit',
+        minute:'2-digit',
+        hour12:true
+      }))
       if (!data?.rate) return
       const converted = (data.rate * numeric).toFixed(4)
 
@@ -149,7 +164,7 @@ const handleConhistory=(to,from,amount)=>{
     // only auto-convert if the expression is a clean number (no operators)
     if (hasOperatorOrBracket(rawMsg)) return
 
-    const id = setTimeout(()=> handleConvert(fromCode, toCode, rawMsg), 100)
+    const id = setTimeout(()=> handleConvert(fromCode, toCode, rawMsg), 300)
     return ()=> clearTimeout(id)
   },[CurFromMsg, CurToMsg, From_code.code, To_code.code])
 
@@ -277,7 +292,8 @@ const handleConhistory=(to,from,amount)=>{
 
   const handleclick = (btn) => {
     const field = isToOrFrom===0 ? 'from' : 'to'
-
+    const func=isToOrFrom==0?setCurToMsg:setCurFromMsg
+    func('')
     if (!isNaN(btn) || btn===".") return handlenum(btn)
     if (btn==="AC") return handleAllClear()
 
@@ -410,7 +426,7 @@ const handleConhistory=(to,from,amount)=>{
 
         <p className='w-full h-5 grid place-items-center text-center absolute
            bottom-0 text-xs font-sans text-gray-500'>
-          Updated at Apr,23, 2026 3:55:00 PM
+          {'Updated at '+ updateTime}
         </p>
 
       </div>
