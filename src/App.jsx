@@ -1,7 +1,7 @@
 import { useEffect, useState } from 'react'
 import './index.css'
 import { evaluate } from "mathjs";
-import {cut,exchange,history} from "../src/icons/images.js"
+import {cut,exchange,history,empty} from "../src/icons/images.js"
 import PrevCal from './component/PrevCal.jsx';
 import CurrencyCal from './component/CurrencyCal.jsx';
 import CurrencySearchPanel from './component/CurrencySearchPanel.jsx';
@@ -231,9 +231,9 @@ function App() {
     
       <div className='w-screen z-1
        h-screen grid place-items-center '>
-        <div className='calculator 2xl:w-[30vw] lg:w-[30vw] 
-        sm:h-10/10.5 lg:h-10/10.5 md:h-10/10.5 md:w-[58vw] sm:w-[65vw]
-w-[95vw]  bg-neutral-950 border-[3px] border-gray-700 rounded-md'>
+        <div className='calculator 2xl:w-[28vw] lg:w-[28vw] 
+        sm:h-10/10.5 lg:h-10/10.5 md:h-10/10.5 md:w-[55vw] sm:w-[62vw]
+w-[92vw]  bg-neutral-950 border-[3px] border-gray-700 rounded-md'>
   {/*search panel*/}
   <CurrencySearchPanel key={2}
   set={{setisSearch,isSearch}} 
@@ -262,7 +262,11 @@ w-[95vw]  bg-neutral-950 border-[3px] border-gray-700 rounded-md'>
               <img src={history} alt="" className='size-6' onClick={()=>setishistry(prev=>!prev)} />
               <div className={`absolute w-70 h-64 rounded-xl border-[1px] overflow-hidden 
               flex flex-col border-gray-700 top-12 left-5 bg-black ${ishistry?"":"hidden"}`}>
-                <div className='w-full h-full scrollbarhide flex px-2 flex-col overflow-x-hidden overflow-y-scroll '>
+<div className={`w-full h-full flex flex-col justify-center gap-0 items-center ${histroy_cal.length==0?'':'hidden'}`}>
+<img src={empty} alt="" className='size-40' />
+<h1 className='text-xl font-bold text-gray-600'>No history found.</h1>
+</div>
+                <div className={`w-full h-full scrollbarhide  flex px-2 flex-col overflow-x-hidden overflow-y-scroll ${histroy_cal.length==0?'hidden':''} `}>
              {
               histroy_cal.map((histry,index)=>{
               
@@ -282,10 +286,10 @@ w-[95vw]  bg-neutral-950 border-[3px] border-gray-700 rounded-md'>
               <img src={exchange} alt="" className='size-7' onClick={()=>setisswitch(prev=>!prev)} />
             </div>
           </div>
-          <div className='w-full h-full  border-gray-700 flex flex-col justify-baseline items-center '>
+          <div className='w-full h-full  border-gray-700 flex  justify-baseline items-center '>
             
-            <div className='w-full h-full border-t-[3px] border-gray-700 flex flex-col justify-baseline items-center'>
-              <div className='w-full h-16  flex justify-around items-center px-0 gap-1 '>
+            <div className='w-full h-full border-t-[3px] px-2 border-gray-700 flex  justify-around items-center p-4'>
+              <div className='w-full h-full btn_stack flex flex-col justify-around items-center px-0  gap-3 '>
                 <button className='w-16 h-12 bg-slate-900 text-xl rounded-xl font-semibold 
    text-emerald-400 hover:bg-slate-800' onClick={() => {
     if(isswitch){ 
@@ -293,7 +297,35 @@ w-[95vw]  bg-neutral-950 border-[3px] border-gray-700 rounded-md'>
     return;}
    handleAllClear()
    }}>AC</button>
-                <button className='w-16 h-12 bg-slate-900 text-xl rounded-xl font-semibold
+<button className='ope w-16 h-12 bg-neutral-800 text-xl rounded-xl font-semibold
+   text-white hover:bg-neutral-700' onClick={() =>{ 
+      if(isswitch){ 
+           handlebtnclick("7")
+                      return;}
+    handleclick("7")}} >7</button>
+<button className=' ope w-16 h-12 bg-neutral-800 text-xl rounded-xl 
+  font-semibold text-white hover:bg-neutral-700' onClick={() =>{
+      if(isswitch){ 
+                     handlebtnclick("4")
+                      return;} handleclick("4")}}>4</button>
+                      <button className='ope w-16 h-12 bg-neutral-800 text-xl
+   rounded-xl font-semibold text-white hover:bg-neutral-700' onClick={() =>{if(isswitch){ 
+                     handlebtnclick("1")
+                      return;} 
+                      handleclick("1")}}>1</button>
+                      <button className={`ope w-16 h-12 bg-neutral-800 text-2xl rounded-xl font-semibold
+   text-white hover:bg-neutral-700 ${isswitch?'hidden':''}`} onClick={() => handleclick("%")}>%</button>
+               <button className={`ope w-16 h-12 bg-neutral-800 text-xl rounded-xl font-semibold text-white
+     hover:bg-neutral-700 ${isswitch?'':'hidden'}`} onClick={() => {
+        if(isswitch){ 
+                     handlebtnclick("00")
+                      return;}
+      handleclick("00")}}>00</button>
+              
+               
+              </div>
+              <div className='w-full h-full btn_stack  flex flex-col justify-around items-center px-0 gap-3 '>
+                 <button className='w-16 h-12 bg-slate-900 text-xl rounded-xl font-semibold
      text-emerald-400 hover:bg-slate-800 grid place-items-center' onClick={() =>{ 
        if(isswitch){ 
                      handlebtnclick("CUT")
@@ -301,7 +333,35 @@ w-[95vw]  bg-neutral-950 border-[3px] border-gray-700 rounded-md'>
       handlecut()}}>
       <img src={cut} alt="" className='size-10'/>
      </button>
-                <button className='ope w-16 h-12 bg-slate-900 text-3xl rounded-xl font-semibold
+                <button className='ope w-16 h-12 bg-neutral-800 text-xl rounded-xl font-semibold
+     text-white hover:bg-neutral-700' onClick={() => {
+        if(isswitch){ 
+                     handlebtnclick("8")
+                      return;}
+      handleclick("8")}}>8</button>
+      <button className=' ope w-16 h-12 bg-neutral-800
+     text-xl rounded-xl font-semibold text-white hover:bg-neutral-700' onClick={() => {
+        if(isswitch){ 
+                     handlebtnclick("5")
+                      return;}
+      handleclick("5")}}>5</button>
+       <button className='ope w-16 h-12 bg-neutral-800 text-xl rounded-xl
+     font-semibold text-white hover:bg-neutral-700' onClick={() =>{
+
+       if(isswitch){ 
+                     handlebtnclick("2")
+                      return;}
+      handleclick("2")}}>2</button>
+      <button className='ope w-16 h-12 bg-neutral-800 text-xl rounded-xl font-semibold text-white
+     hover:bg-neutral-700' onClick={() =>{   if(isswitch){ 
+                     handlebtnclick("0")
+                      return;}handleclick("0")}}>0</button>
+              
+              
+              </div>
+            
+              <div className='w-full h-full btn_stack flex flex-col justify-around items-center px-0 gap-3 '>
+                  <button className='ope w-16 h-12 bg-slate-900 text-3xl rounded-xl font-semibold
       text-emerald-400 hover:bg-slate-800' onClick={() =>{ 
         if(isswitch){ 
          
@@ -309,9 +369,37 @@ w-[95vw]  bg-neutral-950 border-[3px] border-gray-700 rounded-md'>
            return;
         }
         handleclick("÷")}}>÷</button>
-                <div className='w-18 h-12 bg-slate-900 flex text-2xl rounded-xl font-semibold
-      text-emerald-400 '>
-                  <button className='w-full h-full hover:bg-slate-800 rounded-l-xl border-r-[1px] border-gray-700' onClick={() => {
+                  <button className='ope w-16 h-12 bg-neutral-800 text-xl 
+     rounded-xl font-semibold text-white hover:bg-neutral-700' onClick={() =>{  if(isswitch){ 
+                     handlebtnclick("9")
+                      return;} handleclick("9")}}>9</button>
+                <button className=' ope w-16 h-12 bg-neutral-800 text-xl rounded-xl font-semibold
+      text-white hover:bg-neutral-700' onClick={() => {
+          if(isswitch){ 
+                     handlebtnclick("6")
+                      return;}
+        handleclick("6")}}>6</button>
+         <button className='ope w-16 h-12 
+     bg-neutral-800 text-xl rounded-xl font-semibold
+      text-white hover:bg-neutral-700' onClick={() =>{ 
+          if(isswitch){ 
+                     handlebtnclick("3")
+                      return;}
+        handleclick("3")}}>3</button>
+        <button className='ope w-16 h-12 bg-neutral-800 
+     text-3xl rounded-xl font-semibold text-white hover:bg-neutral-700' onClick={() => {
+        if(isswitch){ 
+                     handlebtnclick(".")
+                      return;}
+      handleclick(".")}}>.</button>
+                
+              </div>
+              <div className='w-full h-full btn_stack  flex flex-col justify-around items-center px-0 gap-3 '>
+                
+                <div className={`w-18 h-12 bg-slate-900 flex text-2xl rounded-xl font-semibold
+      text-emerald-400 ${isswitch?'hidden':''}`}>
+                  <button className=
+                  {`w-full h-full hover:bg-slate-800 rounded-l-xl border-r-[1px] border-gray-700  `}onClick={() => {
                     if(isswitch){ 
                      handlebtnclick("(")
                       return;}
@@ -326,109 +414,31 @@ w-[95vw]  bg-neutral-950 border-[3px] border-gray-700 rounded-md'>
                     )
                   </button>
                 </div>
-              </div>
-              <div className='w-full h-16  flex justify-around items-center px-0 gap-1'>
-                <button className='ope w-16 h-12 bg-neutral-800 text-xl rounded-xl font-semibold
-   text-white hover:bg-neutral-700' onClick={() =>{ 
-      if(isswitch){ 
-           handlebtnclick("7")
-                      return;}
-    handleclick("7")}} >7</button>
-                <button className='ope w-16 h-12 bg-neutral-800 text-xl rounded-xl font-semibold
-     text-white hover:bg-neutral-700' onClick={() => {
-        if(isswitch){ 
-                     handlebtnclick("8")
-                      return;}
-      handleclick("8")}}>8</button>
-                <button className='ope w-16 h-12 bg-neutral-800 text-xl 
-     rounded-xl font-semibold text-white hover:bg-neutral-700' onClick={() =>{  if(isswitch){ 
-                     handlebtnclick("9")
-                      return;} handleclick("9")}}>9</button>
-                <button className='ope  w-16 h-12 font-thin bg-slate-900
+                 <button className='ope  w-16 h-12 font-thin bg-slate-900
       text-2xl rounded-xl  text-emerald-400 hover:bg-slate-800' onClick={() =>{  if(isswitch){ 
                      handlebtnclick("x")
                       return;} handleclick("x")}}>x</button>
-              </div>
-            
-              <div className='w-full h-16  flex justify-around items-center px-0 gap-1 '>
-                <button className=' ope w-16 h-12 bg-neutral-800 text-xl rounded-xl 
-  font-semibold text-white hover:bg-neutral-700' onClick={() =>{
-      if(isswitch){ 
-                     handlebtnclick("4")
-                      return;} handleclick("4")}}>4</button>
-                <button className=' ope w-16 h-12 bg-neutral-800
-     text-xl rounded-xl font-semibold text-white hover:bg-neutral-700' onClick={() => {
-        if(isswitch){ 
-                     handlebtnclick("5")
-                      return;}
-      handleclick("5")}}>5</button>
-                <button className=' ope w-16 h-12 bg-neutral-800 text-xl rounded-xl font-semibold
-      text-white hover:bg-neutral-700' onClick={() => {
-          if(isswitch){ 
-                     handlebtnclick("6")
-                      return;}
-        handleclick("6")}}>6</button>
-                <button className=' ope w-16 h-12 bg-slate-900 text-3xl 
+                      <button className=' ope w-16 h-12 bg-slate-900 text-3xl 
      rounded-xl font-semibold text-emerald-400 hover:bg-slate-800' onClick={() => {
         if(isswitch){ 
                      handlebtnclick("-")
                       return;}
       handleclick("-")}}>-</button>
-              </div>
-              <div className='w-full h-16  flex justify-around items-center px-0 gap-1'>
-                <button className='ope w-16 h-12 bg-neutral-800 text-xl
-   rounded-xl font-semibold text-white hover:bg-neutral-700' onClick={() =>{if(isswitch){ 
-                     handlebtnclick("1")
-                      return;} 
-                      handleclick("1")}}>1</button>
-                <button className='ope w-16 h-12 bg-neutral-800 text-xl rounded-xl
-     font-semibold text-white hover:bg-neutral-700' onClick={() =>{
-
-       if(isswitch){ 
-                     handlebtnclick("2")
-                      return;}
-      handleclick("2")}}>2</button>
-                <button className='ope w-16 h-12 
-     bg-neutral-800 text-xl rounded-xl font-semibold
-      text-white hover:bg-neutral-700' onClick={() =>{ 
-          if(isswitch){ 
-                     handlebtnclick("3")
-                      return;}
-        handleclick("3")}}>3</button>
                 <button className='ope w-16 h-12 bg-slate-900
       text-2xl rounded-xl font-semibold text-emerald-400 hover:bg-slate-800' onClick={() =>{ 
           if(isswitch){ 
                      handlebtnclick("+")
                       return;}
         handleclick("+")}}>+</button>
-              </div>
-              <div className='w-full h-16  flex justify-around items-center px-0  gap-1'>
-                <button className={`ope w-16 h-12 bg-neutral-800 text-2xl rounded-xl font-semibold
-   text-white hover:bg-neutral-700 ${isswitch?'hidden':''}`} onClick={() => handleclick("%")}>%</button>
-                <button className='ope w-16 h-12 bg-neutral-800 text-xl rounded-xl font-semibold text-white
-     hover:bg-neutral-700' onClick={() =>{   if(isswitch){ 
-                     handlebtnclick("0")
-                      return;}handleclick("0")}}>0</button>
-     <button className={`ope w-16 h-12 bg-neutral-800 text-xl rounded-xl font-semibold text-white
-     hover:bg-neutral-700 ${isswitch?'':'hidden'}`} onClick={() => {
-        if(isswitch){ 
-                     handlebtnclick("00")
-                      return;}
-      handleclick("00")}}>00</button>
-                <button className='ope w-16 h-12 bg-neutral-800 
-     text-3xl rounded-xl font-semibold text-white hover:bg-neutral-700' onClick={() => {
-        if(isswitch){ 
-                     handlebtnclick(".")
-                      return;}
-      handleclick(".")}}>.</button>
-                <button className='ope w-16 h-12 bg-slate-900 text-2xl 
-     rounded-xl font-semibold text-emerald-400 hover:bg-slate-800'
+         <button className={`ope w-16 transition-all duration-300 ${isswitch?'h-26':'h-12'} bg-slate-900 text-2xl 
+     rounded-xl font-semibold text-emerald-400 hover:bg-slate-800`}
       onClick={() =>{ 
         if(isswitch){ 
                      handlebtnclick("=")
                       return;}
         handlecalculate(cal_msg)}}>=</button>
               </div>
+             
             </div>
           </div>
           </div>

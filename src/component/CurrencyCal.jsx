@@ -103,6 +103,7 @@ const handleConhistory=(to,from,amount)=>{
     
     const evaluated = handlecalculate(rawMsg) ?? rawMsg
     const numeric   = parseFloat(evaluated)
+    console.log(numeric)
     if(rawMsg=='') return
     if (isNaN(numeric)) return
 
@@ -144,6 +145,7 @@ const handleConhistory=(to,from,amount)=>{
     const toCode     = isToOrFrom===0 ? To_code.code   : From_code.code
 
     const result = handlecalculate(currentMsg)
+    console.log(result)
     if (result !== null) {
       // push evaluated result into active field
       func(result)
@@ -155,18 +157,19 @@ const handleConhistory=(to,from,amount)=>{
   }
 
   // also auto-convert whenever the active field changes (debounced)
-  useEffect(()=>{
-    if (!CurFromMsg && !CurToMsg) return
-    const fromCode = isToOrFrom===0 ? From_code.code : To_code.code
-    const toCode   = isToOrFrom===0 ? To_code.code   : From_code.code
-    const rawMsg   = isToOrFrom===0 ? CurFromMsg : CurToMsg
+ useEffect(()=>{
+  if (!CurFromMsg && !CurToMsg) return
+  const fromCode = isToOrFrom===0 ? From_code.code : To_code.code
+  const toCode   = isToOrFrom===0 ? To_code.code   : From_code.code
+  const rawMsg   = isToOrFrom===0 ? CurFromMsg : CurToMsg
 
-    // only auto-convert if the expression is a clean number (no operators)
-    if (hasOperatorOrBracket(rawMsg)) return
+  // evaluate expression first if it has operators, then convert with result
+  const evaluated = hasOperatorOrBracket(rawMsg) ? handlecalculate(rawMsg) : rawMsg
+  if (evaluated === null) return
 
-    const id = setTimeout(()=> handleConvert(fromCode, toCode, rawMsg), 300)
-    return ()=> clearTimeout(id)
-  },[CurFromMsg, CurToMsg, From_code.code, To_code.code])
+  const id = setTimeout(()=> handleConvert(fromCode, toCode, evaluated), 200)
+  return ()=> clearTimeout(id)
+},[CurFromMsg, CurToMsg, From_code.code, To_code.code])
 
   // ─── btn prop handler ────────────────────────────────────────────────────
 
@@ -188,7 +191,7 @@ const handleConhistory=(to,from,amount)=>{
 
       if(e.key==="Backspace") { handlecut();      return }
       if(e.key==="Enter")     { handleEvaluate(); return }
-      if("0123456789+-*/%()".includes(e.key)){
+      if("0123456789+-*/%".includes(e.key)){
         if(e.key==='/') { handleclick('÷'); return }
         if(e.key==='*') { handleclick('x'); return }
         handleclick(e.key)
