@@ -27,50 +27,48 @@ function CurrencyCal({set,show,setSear,setbar,Cur_bar,bardata,btn}) {
     :
     { name:"Indian Rupee", code:"INR", amount:"1" }
   )
- const [CurToMsg, setCurToMsg] = useState(To_code.amount)
+  const [CurToMsg, setCurToMsg] = useState(To_code.amount)
   const [CurFromMsg, setCurFromMsg] = useState(From_code.amount)
+
   // ─── helpers ──────────────────────────────────────────────────────────────
-useEffect(()=>{
-  lastConvert=JSON.parse(localStorage.getItem("lastconverted"))
-  SetFrom_code(()=>lastConvert?
-    { name:lastConvert.fromname, code:lastConvert.fromcode, amount:lastConvert.value }
-    :
-    { name:"Indian Rupee", code:"INR", amount:"1" } )
+  useEffect(()=>{
+    lastConvert=JSON.parse(localStorage.getItem("lastconverted"))
+    SetFrom_code(()=>lastConvert?
+      { name:lastConvert.fromname, code:lastConvert.fromcode, amount:lastConvert.value }
+      :
+      { name:"Indian Rupee", code:"INR", amount:"1" })
     SetTo_code(()=>lastConvert?
-    { name:lastConvert.toname, code:lastConvert.tocode }
-    :
-    { name:"Japanese Yen", code:"JPY" })
+      { name:lastConvert.toname, code:lastConvert.tocode }
+      :
+      { name:"Japanese Yen", code:"JPY" })
     setCurFromMsg(From_code.amount)
-    
-},[show,setSear.isSearch])
-useEffect(()=>{
-const currentMsg = isToOrFrom===0 ? CurFromMsg : CurToMsg
+  },[show,setSear.isSearch])
+
+  useEffect(()=>{
+    const currentMsg = isToOrFrom===0 ? CurFromMsg : CurToMsg
     const func       = isToOrFrom===0 ? setCurToMsg : setCurFromMsg
     if(currentMsg==='')
       func('')
-},[CurFromMsg,CurToMsg])
+  },[CurFromMsg,CurToMsg])
+
   const hasOperatorOrBracket = (msg) => /[+\-x÷%()]/.test(msg)
 
   const handlecalculate = (fieldMsg) => {
     try {
       let expression = fieldMsg
-        .replace(/(\d)\(/g, '$1*(')   // 2(3)  → 2*(3)
-        .replace(/\)(\d)/g, ')*$1')   // )2    → )*2
-        .replace(/\)\(/g,   ')*(')    // )(    → )*(
+        .replace(/(\d)\(/g, '$1*(')
+        .replace(/\)(\d)/g, ')*$1')
+        .replace(/\)\(/g,   ')*(')
         .replace(/x/g,  '*')
         .replace(/÷/g,  '/')
         .replace(/%/g,  '/100')
 
-      // strip leading junk operators (keep leading minus)
       expression = expression.replace(/^[+x÷*/]+/, '')
-      // strip trailing operators
       expression = expression.replace(/[+\-x÷*/]+$/, '')
-      // strip trailing open brackets
       expression = expression.replace(/\(+$/, '')
 
       if (!expression.trim()) return null
 
-      // balance brackets
       const open  = (expression.match(/\(/g) || []).length
       const close = (expression.match(/\)/g) || []).length
       if (open > close) expression += ')'.repeat(open - close)
@@ -84,26 +82,24 @@ const currentMsg = isToOrFrom===0 ? CurFromMsg : CurToMsg
     }
   }
 
-  // ─── conversion ───────────────────────────────────────────────────────────
-const handleConhistory=(to,from,amount)=>{
- 
-  const temp={
-    fromname:from.name,
-    fromcode:from.code,
-    value:amount,
-    toname:to.name,
-    tocode:to.code
-
+  // ─── conversion history ───────────────────────────────────────────────────
+  const handleConhistory=(to,from,amount)=>{
+    const temp={
+      fromname:from.name,
+      fromcode:from.code,
+      value:amount,
+      toname:to.name,
+      tocode:to.code
+    }
+    localStorage.setItem("lastconverted",JSON.stringify(temp))
   }
-  localStorage.setItem("lastconverted",JSON.stringify(temp))
-}
-  // convert FROM → TO and put result in the inactive field
+
+  // ─── convert FROM → TO ────────────────────────────────────────────────────
   const handleConvert = async (fromCode, toCode, rawMsg) => {
-   const func=isToOrFrom==0?setCurToMsg:setCurFromMsg
+    const func=isToOrFrom==0?setCurToMsg:setCurFromMsg
     
     const evaluated = handlecalculate(rawMsg) ?? rawMsg
     const numeric   = parseFloat(evaluated)
-    console.log(numeric)
     if(rawMsg=='') return
     if (isNaN(numeric)) return
 
@@ -123,20 +119,21 @@ const handleConhistory=(to,from,amount)=>{
       if (!data?.rate) return
       const converted = (data.rate * numeric).toFixed(4)
 
-      // always write conversion result into the OTHER field
       if (isToOrFrom === 0) {
         setCurToMsg(converted.toString())
       } else {
         setCurFromMsg(converted.toString())
       }
-      handleConhistory(To_code,From_code,CurFromMsg)
+
+      // store evaluated expression (e.g. 16 instead of 5+11)
+      const evaluatedFromMsg = handlecalculate(CurFromMsg) ?? CurFromMsg
+      handleConhistory(To_code, From_code, evaluatedFromMsg)
     } catch (err) {
       console.error('Conversion error:', err)
     }
   }
 
   // ─── evaluate + convert ───────────────────────────────────────────────────
-
   const handleEvaluate = () => {
     const currentMsg = isToOrFrom===0 ? CurFromMsg : CurToMsg
     const func       = isToOrFrom===0 ? setCurFromMsg : setCurToMsg
@@ -145,34 +142,30 @@ const handleConhistory=(to,from,amount)=>{
     const toCode     = isToOrFrom===0 ? To_code.code   : From_code.code
 
     const result = handlecalculate(currentMsg)
-    console.log(result)
     if (result !== null) {
-      // push evaluated result into active field
       func(result)
       setshowprevs(prev=>({...prev, [field]:false}))
       setOverwrite(prev=>({...prev, [field]:true}))
-      // trigger conversion with the evaluated value
       handleConvert(fromCode, toCode, result)
     }
   }
 
-  // also auto-convert whenever the active field changes (debounced)
- useEffect(()=>{
-  if (!CurFromMsg && !CurToMsg) return
-  const fromCode = isToOrFrom===0 ? From_code.code : To_code.code
-  const toCode   = isToOrFrom===0 ? To_code.code   : From_code.code
-  const rawMsg   = isToOrFrom===0 ? CurFromMsg : CurToMsg
+  // ─── auto-convert on field change (debounced) ─────────────────────────────
+  useEffect(()=>{
+    if (!CurFromMsg && !CurToMsg) return
+    const fromCode = isToOrFrom===0 ? From_code.code : To_code.code
+    const toCode   = isToOrFrom===0 ? To_code.code   : From_code.code
+    const rawMsg   = isToOrFrom===0 ? CurFromMsg : CurToMsg
 
-  // evaluate expression first if it has operators, then convert with result
-  const evaluated = hasOperatorOrBracket(rawMsg) ? handlecalculate(rawMsg) : rawMsg
-  if (evaluated === null) return
+    // evaluate expression first if it has operators, then convert with result
+    const evaluated = hasOperatorOrBracket(rawMsg) ? handlecalculate(rawMsg) : rawMsg
+    if (evaluated === null) return
 
-  const id = setTimeout(()=> handleConvert(fromCode, toCode, evaluated), 200)
-  return ()=> clearTimeout(id)
-},[CurFromMsg, CurToMsg, From_code.code, To_code.code])
+    const id = setTimeout(()=> handleConvert(fromCode, toCode, evaluated), 200)
+    return ()=> clearTimeout(id)
+  },[CurFromMsg, CurToMsg, From_code.code, To_code.code])
 
-  // ─── btn prop handler ────────────────────────────────────────────────────
-
+  // ─── btn prop handler ─────────────────────────────────────────────────────
   useEffect(()=>{
     if(!btn) return
     if(btn.value==="AC")  { handleAllClear(); return }
@@ -182,11 +175,8 @@ const handleConhistory=(to,from,amount)=>{
   },[btn])
 
   // ─── keyboard handler ─────────────────────────────────────────────────────
-
   useEffect(()=>{
     const handlekeydown=(e)=>{
-      // don't steal keys from search input or any other input
-      const tag = document.activeElement.tagName
       if(setSear.isSearch && show) return
 
       if(e.key==="Backspace") { handlecut();      return }
@@ -202,7 +192,6 @@ const handleConhistory=(to,from,amount)=>{
   })
 
   // ─── bardata handler ──────────────────────────────────────────────────────
-
   useEffect(()=>{
     if(!bardata?.code) return
     if(setbar.whichCurbar===0){
@@ -213,7 +202,6 @@ const handleConhistory=(to,from,amount)=>{
   },[bardata])
 
   // ─── input handlers ───────────────────────────────────────────────────────
-
   const handlecut = () => {
     const func  = isToOrFrom===0 ? setCurFromMsg : setCurToMsg
     const field = isToOrFrom===0 ? 'from' : 'to'
@@ -238,32 +226,6 @@ const handleConhistory=(to,from,amount)=>{
       return
     }
     func(prev => prev + num)
-  }
-
-  const handlebrackets = (bracket) => {
-    const func  = isToOrFrom===0 ? setCurFromMsg : setCurToMsg
-    const field = isToOrFrom===0 ? 'from' : 'to'
-
-    func(prev => {
-      const last = prev.slice(-1)
-      if (bracket === "(") {
-        if (!prev || operators.includes(last) || last==="(") return prev+"("
-        if (prev==="0") return "("
-        return prev+"("
-      }
-      const open  = (prev.match(/\(/g)||[]).length
-      const close = (prev.match(/\)/g)||[]).length
-      if (open>close && last!=="(" && !operators.includes(last))
-        return prev+")"
-      return prev
-    })
-
-    const currentMsg = isToOrFrom===0 ? CurFromMsg : CurToMsg
-    const result = handlecalculate(currentMsg)
-    if (result!==null) {
-      setshowprevs(prev=>({...prev, [field]:true}))
-      setOverwrite(prev=>({...prev, [field]:false}))
-    }
   }
 
   const handleoperator = (ope) => {
@@ -295,7 +257,7 @@ const handleConhistory=(to,from,amount)=>{
 
   const handleclick = (btn) => {
     const field = isToOrFrom===0 ? 'from' : 'to'
-    const func=isToOrFrom==0?setCurToMsg:setCurFromMsg
+    const func = isToOrFrom===0 ? setCurToMsg : setCurFromMsg
     func('')
     if (!isNaN(btn) || btn===".") return handlenum(btn)
     if (btn==="AC") return handleAllClear()
@@ -317,14 +279,11 @@ const handleConhistory=(to,from,amount)=>{
       return
     }
 
-    if (btn==="=")            { handleEvaluate();    return }
-    if (btn===")"||btn==="(") return handlebrackets(btn)
+    if (btn==="=") { handleEvaluate(); return }
     return handleoperator(btn)
   }
 
-  // ─── field switch handlers ─────────────────────────────────────────────────
-
-  // top field = FROM (user types here)
+  // ─── field switch handlers ────────────────────────────────────────────────
   const handleFromClick = () => {
     if(isToOrFrom!==0){
       const result = handlecalculate(CurToMsg)
@@ -337,7 +296,6 @@ const handleConhistory=(to,from,amount)=>{
     setisToOrFrom(0)
   }
 
-  // bottom field = TO (shows conversion result, but also editable)
   const handleToClick = () => {
     if(isToOrFrom!==1){
       const result = handlecalculate(CurFromMsg)
@@ -351,7 +309,6 @@ const handleConhistory=(to,from,amount)=>{
   }
 
   // ─── render ───────────────────────────────────────────────────────────────
-
   return (
     <>
       <div className={`relative w-full h-1/2 rounded-md overflow-hidden
